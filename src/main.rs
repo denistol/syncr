@@ -10,6 +10,7 @@ mod message;
 
 use chrono::Utc;
 use client::Client;
+use message::Message;
 
 fn handle_stream(mut stream: TcpStream, clients: Arc<Mutex<HashMap<IpAddr, Client>>>) {
     let addr = stream.peer_addr().unwrap().ip();
@@ -32,7 +33,20 @@ fn handle_stream(mut stream: TcpStream, clients: Arc<Mutex<HashMap<IpAddr, Clien
         Ok(n) => {
             if n == 0 {
                 remove_client();
-            } else {
+            } else if n == 1 {
+                match Message::from_byte(buffer[0]) {
+                    Some(Message::GetDir) => {
+                        println!("GetDir command");
+                    },
+                    Some(Message::ShowDir) => {
+                        println!("ShowDir command");
+                    },
+                    _ => {
+                        println!("Invalid command {}", buffer[0]);
+                    }
+                }
+            }
+            else {
                 println!("Received {} bytes from {}", n, addr);
                 println!("Received bytes: {:?}", &buffer[0..n]);
                 let mut clients = clients.lock().unwrap();
