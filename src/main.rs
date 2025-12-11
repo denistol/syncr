@@ -1,6 +1,8 @@
-mod entry;
-use entry::get_entries;
-use std::env::args;
+mod client;
+mod message;
+use std::{env::args, thread::sleep, time::Duration};
+
+use crate::client::Client;
 
 #[allow(unused)]
 #[allow(dead_code)]
@@ -10,9 +12,9 @@ fn main() {
 
     let base_path = "C:\\Users\\denis\\rsync\\testdir";
 
-    let entry_list = get_entries(base_path).unwrap();
-    
-    for i in entry_list.items {
-        println!("{}", i);
-    }
+    let mut client = Client::new(base_path);
+
+    client.show_info();
+    client.run();
+
 }
