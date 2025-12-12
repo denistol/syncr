@@ -1,11 +1,12 @@
+use std::{fs::File, io::Write};
+
+use crate::constants::{END_HEADER, START_HEADER};
+
 pub struct Message {
     buffer: Vec<u8>,
     pub filled: bool,
     pub data: Vec<u8>,
 }
-
-static START_HEADER: &[u8] = b"START";
-static END_HEADER: &[u8] = b"END";
 
 impl Message {
     pub fn new() -> Self {
@@ -27,7 +28,6 @@ impl Message {
 
                 self.data = self.buffer[start_pos + START_HEADER.len()..end_pos].to_vec();
                 self.filled = true;
-
                 self.buffer.drain(..end_pos + END_HEADER.len());
             }
         } else {
@@ -50,6 +50,9 @@ impl Message {
 
     pub fn print_message(&self) {
         if self.filled {
+            let mut f = File::create("C:\\Users\\denis\\rsync\\testdir\\writed.txt").unwrap();
+            f.write_all(&self.data).unwrap();
+
             println!("MESSAGE READY: {}", String::from_utf8_lossy(&self.data));
         }
     }

@@ -1,17 +1,19 @@
-use std::{io::Write, net::{TcpListener, TcpStream}};
+use std::{io::Write, net::TcpStream};
+
+use rsync::constants::{END_HEADER, START_HEADER};
+
 
 fn main() {
     let mut listener = TcpStream::connect("127.0.0.1:6969").unwrap();
 
-    let start_header = "START";
-    let end_header = "END";
-    let message = "hello world";
+    let message = include_str!("C:\\Users\\denis\\rsync\\Cargo.toml");
 
     let buffer = [
-        start_header.as_bytes(),
+        START_HEADER,
         message.as_bytes(),
-        end_header.as_bytes()
-    ].concat();
+        END_HEADER,
+    ]
+    .concat();
 
     listener.write(&buffer).unwrap();
     print!("Sender")

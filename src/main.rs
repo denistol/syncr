@@ -1,11 +1,8 @@
-mod client;
-mod message;
+#![allow(dead_code)]
+#![allow(unused)]
+
 use std::{env::args, thread::sleep, time::Duration};
-
-use crate::client::Client;
-
-#[allow(unused)]
-#[allow(dead_code)]
+use rsync::client::Client;
 
 fn main() {
     let arguments: Vec<String> = args().collect();
@@ -16,5 +13,4 @@ fn main() {
 
     client.show_info();
     client.run();
-
 }

@@ -2,14 +2,16 @@ use std::{
     fs::{DirEntry, read_dir},
     io::{BufReader, Read},
     net::{TcpListener, TcpStream},
-    os::windows::fs::MetadataExt,
     path::PathBuf,
-    sync::{Arc, Mutex, mpsc::{self, Sender, SyncSender}},
+    sync::{
+        Arc, Mutex,
+        mpsc::{self, Sender, SyncSender},
+    },
     thread::{self, sleep},
     time::{Duration, SystemTime},
 };
 
-use crate::message::Message;
+use crate::{constants::BUFFER_SIZE, message::Message};
 
 pub struct Client {
     pub base_path: PathBuf,
@@ -22,13 +24,10 @@ pub struct ChannelEvent {
     pub stream: Arc<Mutex<TcpStream>>,
 }
 
-const BUFFER_SIZE: usize = 4096;
-
 fn handle_stream(stream: Arc<Mutex<TcpStream>>, sender: &SyncSender<ChannelEvent>) {
     let mut buffer = [0; BUFFER_SIZE];
 
     loop {
-        // берем блокировку только на момент чтения
         let readed_bytes = {
             let mut s = stream.lock().unwrap();
             s.read(&mut buffer).unwrap_or(0)
@@ -46,8 +45,6 @@ fn handle_stream(stream: Arc<Mutex<TcpStream>>, sender: &SyncSender<ChannelEvent
         sender.send(channel_event).unwrap();
     }
 }
-
-
 
 impl Client {
     pub fn show_info(&self) {
@@ -105,16 +102,14 @@ impl Client {
         let mut message = Message::new();
 
         for r in rx.iter() {
-
             message.append(&r.data);
 
             if message.is_filled() {
                 message.print_message();
-                todo!("Create response message to stream");
+                // todo!("Create response message to stream");
                 message.reset();
             }
         }
         t2.join().unwrap();
-
     }
 }
