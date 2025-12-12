@@ -1,17 +1,18 @@
 use std::{
     fs::{DirEntry, read_dir},
-    io::{BufReader, Read},
+    io::Read,
     net::{TcpListener, TcpStream},
     path::PathBuf,
     sync::{
         Arc, Mutex,
-        mpsc::{self, Sender, SyncSender},
+        mpsc::{self, SyncSender},
     },
-    thread::{self, sleep},
-    time::{Duration, SystemTime},
+    thread::{self},
+    time::SystemTime,
 };
 
-use crate::{constants::BUFFER_SIZE, message::Message};
+use crate::{BUFFER_SIZE, Message};
+
 
 pub struct Client {
     pub base_path: PathBuf,
@@ -55,6 +56,10 @@ impl Client {
     }
 
     pub fn new(base_path: &str) -> Self {
+        let p = PathBuf::from(base_path);
+        if !p.exists() {
+            panic!("Path {:?} not exists!", &p);
+        }
         let mut client = Client {
             base_path: PathBuf::from(base_path),
             current_files: vec![],

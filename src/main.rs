@@ -2,7 +2,8 @@
 #![allow(unused)]
 
 use std::{env::args, thread::sleep, time::Duration};
-use rsync::client::Client;
+
+use rsync::Client;
 
 fn main() {
     let arguments: Vec<String> = args().collect();
