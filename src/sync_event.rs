@@ -1,4 +1,4 @@
-use crate::{END_HEADER, START_HEADER, sync_message::SyncMessage};
+use crate::{START_HEADER, sync_message::SyncMessage};
 
 #[derive(Debug)]
 pub struct SyncEvent {
@@ -24,47 +24,21 @@ impl SyncEvent {
     pub fn parse(&mut self, incomig: &[u8]) -> Option<SyncMessage> {
         self.inner_buffer.extend_from_slice(incomig);
 
-
-        // example first 10 bytes |GET_INFO............|
-        // example first 10 bytes |GET_FILE............|
-        // example first 10 bytes |GET_FILES_RESPONSE..|
-        // example first 10 bytes |FILE_RESPONSE.......|
-
-        // First 10 bytes = message type
-        // Second 10 bytes = 
-
         let has_start = find_subsequence(&self.inner_buffer, START_HEADER);
         if let Some(start_header_index) = has_start {
-
             let end = START_HEADER.len() + start_header_index;
 
             let msg_size_from = end;
-            let msg_size_end = msg_size_from+50;
+            let msg_size_end = msg_size_from + 50;
 
             let content_length = &self.inner_buffer[msg_size_from..msg_size_end];
 
-            println!("=========: {:?}", String::from_utf8(content_length.to_vec()).unwrap());
-
+            println!(
+                "=========: {:?}",
+                String::from_utf8(content_length.to_vec()).unwrap()
+            );
         }
 
-        // None
-
-        // let msg_size = self.inner_buffer[]
-
-        // if let Some(start_pos) = find_subsequence(&self.inner_buffer, START_HEADER) {
-        //     if let Some(end_rel) = find_subsequence(
-        //         &self.inner_buffer[start_pos + START_HEADER.len()..],
-        //         END_HEADER,
-        //     ) {
-        //         let end_pos = start_pos + START_HEADER.len() + end_rel;
-        //         let full_message =
-        //             self.inner_buffer[start_pos + START_HEADER.len()..end_pos].to_vec();
-
-        //         self.inner_buffer.clear();
-
-        //         return Some(());
-        //     }
-        // }
         None
     }
 }

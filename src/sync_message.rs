@@ -1,8 +1,11 @@
-use std::{net::TcpStream, sync::{Arc, Mutex}};
+use std::{
+    net::TcpStream,
+    sync::{Arc, Mutex},
+};
 
 pub enum SyncMessageType {
-    GET_FILES,
-    LIST_FILES,
+    GetFiles,
+    ListFiles,
 }
 pub struct SyncMessage {
     stream: Arc<Mutex<TcpStream>>,
