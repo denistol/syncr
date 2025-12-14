@@ -11,8 +11,7 @@ use std::{
     time::SystemTime,
 };
 
-use crate::{BUFFER_SIZE, Message};
-
+use crate::{BUFFER_SIZE, END_HEADER, START_HEADER, sync_event::SyncEvent};
 
 pub struct Client {
     pub base_path: PathBuf,
@@ -20,30 +19,26 @@ pub struct Client {
     pub last_mod: Option<SystemTime>,
 }
 
-pub struct ChannelEvent {
-    pub data: Vec<u8>,
-    pub stream: Arc<Mutex<TcpStream>>,
-}
 
-fn handle_stream(stream: Arc<Mutex<TcpStream>>, sender: &SyncSender<ChannelEvent>) {
+
+
+fn handle_stream(stream: Arc<Mutex<TcpStream>>, sender: &SyncSender<SyncEvent>) {
+    
     let mut buffer = [0; BUFFER_SIZE];
+    let mut event = SyncEvent::new();
 
     loop {
-        let readed_bytes = {
+        {
             let mut s = stream.lock().unwrap();
-            s.read(&mut buffer).unwrap_or(0)
+            let bytes = s.read(&mut buffer).unwrap_or(0);
+
+            if bytes == 0 {
+                break;
+            };
+
+            let message = event.parse(&buffer);
         };
 
-        if readed_bytes == 0 {
-            println!("[-] Connection closed...");
-            break;
-        }
-
-        let channel_event = ChannelEvent {
-            data: buffer[..readed_bytes].to_vec(),
-            stream: stream.clone(),
-        };
-        sender.send(channel_event).unwrap();
     }
 }
 
@@ -88,7 +83,7 @@ impl Client {
 
     pub fn run(&mut self) {
         let listener = TcpListener::bind("127.0.0.1:6969").unwrap();
-        let (tx, rx) = mpsc::sync_channel::<ChannelEvent>(16);
+        let (tx, rx) = mpsc::sync_channel::<SyncEvent>(16);
 
         let t2 = thread::spawn(move || {
             for z in listener.incoming() {
@@ -104,16 +99,8 @@ impl Client {
 
         println!("[*] Receiver loop started ...");
 
-        let mut message = Message::new();
-
         for r in rx.iter() {
-            message.append(&r.data);
-
-            if message.is_filled() {
-                message.print_message();
-                // todo!("Create response message to stream");
-                message.reset();
-            }
+            println!("{}", r.to_string())
         }
         t2.join().unwrap();
     }

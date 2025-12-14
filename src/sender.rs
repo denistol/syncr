@@ -6,11 +6,14 @@ use rsync::constants::{END_HEADER, START_HEADER};
 fn main() {
     let mut listener = TcpStream::connect("127.0.0.1:6969").unwrap();
 
-    let message = include_str!("C:\\Users\\denis\\rsync\\Cargo.toml");
+
+    let mut msg: Vec<u8> = vec![];
+    msg.reserve(300);
+    
 
     let buffer = [
         START_HEADER,
-        message.as_bytes(),
+        &msg,
         END_HEADER,
     ]
     .concat();
