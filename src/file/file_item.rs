@@ -62,7 +62,27 @@ impl FileItem {
 
 impl Display for FileItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}\t{}", self.size, self.full_path.to_string_lossy())
+        let chunks_count = self.chunks.len();
+
+        let chunkz: String = self
+            .chunks
+            .iter()
+            .map(|c| format!("hash: {}, size: {}, offset: {}\n", c.hash, c.size, c.offset))
+            .collect();
+
+        write!(
+            f,
+            "
+        SIZE:{}\tFULL_PATH:{}\tCHUNKS_COUNT:{}
+        -chunks-
+        {}
+        --------------
+        ",
+            self.size,
+            self.full_path.to_string_lossy(),
+            chunks_count,
+            chunkz
+        )
     }
 }
 

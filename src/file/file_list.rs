@@ -9,7 +9,6 @@ use std::env::temp_dir;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 fn get_log_path() -> PathBuf {
@@ -41,8 +40,12 @@ impl FileList {
         }
 
         // list.load_files();
+        // list.save_to_file();
+        
         list.preload_from_cache();
 
+
+        list.show_log();
         let duration = start.elapsed();
         // list.show_log();
         println!("Scan time: {:?} / Count: {}", duration, list.list.len());
@@ -62,9 +65,15 @@ impl FileList {
     pub fn preload_from_cache(&mut self) {
         let file = File::open(get_log_path()).unwrap();
         let mut reader = BufReader::new(file);
-        let list: Vec<FileItem> =
-            bincode::decode_from_std_read(&mut reader, bincode::config::standard()).unwrap();
-        self.list = list;
+        
+        match bincode::decode_from_std_read(&mut reader, bincode::config::standard()) {
+            Ok(list) => {
+                self.list = list;
+            },
+            _ => {
+                self.list = vec![]
+            }
+        };
     }
 
     pub fn load_files(&mut self) {
@@ -117,8 +126,7 @@ impl FileList {
         self.list.par_iter_mut().for_each(|item| {
             item.get_chunks();
         });
-
-        self.show_log();
-        self.save_to_file();
+        // self.show_log();
+        
     }
 }

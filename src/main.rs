@@ -1,7 +1,10 @@
+use std::{env, path::PathBuf};
+
 use rsync::client::client::Client;
+use dotenv::dotenv;
 
 fn main() {
-    if let Some(hd) = std::env::home_dir() {
-        let _ = Client::new(&hd);
-    }
+    dotenv().ok();
+    let p = PathBuf::from(env::var("ROOT_DIR").unwrap());
+    let _ = Client::new(&p);
 }
