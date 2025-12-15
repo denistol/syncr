@@ -3,11 +3,13 @@ use crate::file::file_item::FileItem;
 use bincode;
 use chrono::{DateTime, Utc};
 use ignore::WalkBuilder;
+use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use serde::{Deserialize, Serialize};
 use std::env::temp_dir;
 use std::fs::File;
 use std::io::{BufReader, BufWriter};
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 fn get_log_path() -> PathBuf {
@@ -38,10 +40,11 @@ impl FileList {
             list.ignored_dirs.push(list.root_dir.join(i));
         }
 
-        list.load_files();
+        // list.load_files();
+        list.preload_from_cache();
 
         let duration = start.elapsed();
-        list.show_log();
+        // list.show_log();
         println!("Scan time: {:?} / Count: {}", duration, list.list.len());
         list
     }
@@ -62,7 +65,6 @@ impl FileList {
         let list: Vec<FileItem> =
             bincode::decode_from_std_read(&mut reader, bincode::config::standard()).unwrap();
         self.list = list;
-        println!("COUNT: {}", self.list.len());
     }
 
     pub fn load_files(&mut self) {
@@ -98,11 +100,11 @@ impl FileList {
                 Err(_) => continue,
             };
 
-            self.list.push(FileItem {
-                full_path: entry.path().to_path_buf(),
-                size: meta.len(),
-                last_mod: Some(modified.timestamp()),
-            });
+            self.list.push(FileItem::new(
+                &entry.path(),
+                meta.len(),
+                Some(modified.timestamp()),
+            ));
 
             self.last_mod = Some(
                 self.last_mod
@@ -111,6 +113,12 @@ impl FileList {
             );
         }
         self.list.sort();
+
+        self.list.par_iter_mut().for_each(|item| {
+            item.get_chunks();
+        });
+
+        self.show_log();
         self.save_to_file();
     }
 }

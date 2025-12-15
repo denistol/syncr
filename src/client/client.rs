@@ -61,7 +61,7 @@ impl Client {
         });
 
         for r in rx.iter() {
-            println!("{}", r.to_string())
+            // println!("{}", r.to_string())
         }
         t2.join().unwrap();
     }
