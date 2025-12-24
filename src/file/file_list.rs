@@ -39,11 +39,10 @@ impl FileList {
             list.ignored_dirs.push(list.root_dir.join(i));
         }
 
-        // list.load_files();
-        // list.save_to_file();
-        
-        list.preload_from_cache();
+        list.load_files();
+        list.save_to_file();
 
+        // list.preload_from_cache();
 
         list.show_log();
         let duration = start.elapsed();
@@ -65,14 +64,12 @@ impl FileList {
     pub fn preload_from_cache(&mut self) {
         let file = File::open(get_log_path()).unwrap();
         let mut reader = BufReader::new(file);
-        
+
         match bincode::decode_from_std_read(&mut reader, bincode::config::standard()) {
             Ok(list) => {
                 self.list = list;
-            },
-            _ => {
-                self.list = vec![]
             }
+            _ => self.list = vec![],
         };
     }
 
@@ -126,7 +123,7 @@ impl FileList {
         self.list.par_iter_mut().for_each(|item| {
             item.get_chunks();
         });
+
         // self.show_log();
-        
     }
 }

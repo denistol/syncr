@@ -1,4 +1,4 @@
-use crate::{START_HEADER, sync_message::SyncMessage};
+use crate::{constants::START_HEADER, sync_message::SyncMessage};
 
 #[derive(Debug)]
 pub struct SyncEvent {

@@ -1,3 +1,4 @@
+use crate::constants::BUFFER_SIZE;
 use std::{
     io::Read,
     net::{TcpListener, TcpStream},
@@ -9,9 +10,7 @@ use std::{
     thread::{self},
 };
 
-use crate::{
-    BUFFER_SIZE, END_HEADER, START_HEADER, file::file_list::FileList, sync_event::SyncEvent,
-};
+use crate::{file::file_list::FileList, sync_event::SyncEvent};
 
 pub struct Client {
     pub file_list: FileList,
