@@ -1,7 +1,13 @@
+<div align="center" style="color: lightgreen;">
+
 # Syncr
 
 is an Experimental local-first synchronization tool designed to efficiently sync
 directories between machines on the same network.
+
+</div>
+
+---
 
 The project focuses on minimizing data transfer by using content-defined chunking and
 binary state persistence.
